@@ -23,26 +23,63 @@ func getServiceNodesLabels(cfg *apiConfig) ([]map[string]string, error) {
 	return ms, nil
 }
 
+func getServiceNames(cfg *apiConfig) (map[string]struct{}, error) {
+	var tags string
+	if len(cfg.tags) > 0 {
+		var tagsQuery strings.Builder
+		for i := 0; i < len(cfg.tags); i++ {
+			tagsQuery.Write([]byte("tag=" + url.QueryEscape(cfg.tags[i])))
+			if i != len(cfg.tags)-1 {
+				tagsQuery.Write([]byte("&"))
+			}
+		}
+		tags = tagsQuery.String()
+	}
+	serviceNames := make(map[string]struct{})
+	if len(cfg.services) > 0 {
+		for _, svc := range cfg.services {
+			path := "/v1/catalog/service/" + svc
+			if len(tags) > 0 {
+				path = path + "?" + tags
+			}
+			data, err := getAPIResponse(cfg, path)
+			if err != nil {
+				return nil, fmt.Errorf("cannot obtain service: %s, err: %w", svc, err)
+			}
+			var svcList []interface{}
+			if err := json.Unmarshal(data, &svcList); err != nil {
+				return nil, fmt.Errorf("cannot parse service: %s response %q: %w", svc, data, err)
+			}
+			if len(svc) > 0 {
+				serviceNames[svc] = struct{}{}
+			}
+		}
+	} else {
+		path := "/v1/catalog/services"
+		if len(tags) > 0 {
+			path = path + "?" + tags
+		}
+		data, err := getAPIResponse(cfg, path)
+		if err != nil {
+			return nil, fmt.Errorf("cannot obtain services: %w", err)
+		}
+		var m map[string][]string
+		if err := json.Unmarshal(data, &m); err != nil {
+			return nil, fmt.Errorf("cannot parse services response %q: %w", data, err)
+		}
+		for serviceName := range m {
+			serviceNames[serviceName] = struct{}{}
+		}
+	}
+	return serviceNames, nil
+}
+
 func getAllServiceNodes(cfg *apiConfig) ([]ServiceNode, error) {
 	// Obtain a list of services
 	// See https://www.consul.io/api/catalog.html#list-services
-	data, err := getAPIResponse(cfg, "/v1/catalog/services")
+	serviceNames, err := getServiceNames(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("cannot obtain services: %w", err)
-	}
-	var m map[string][]string
-	if err := json.Unmarshal(data, &m); err != nil {
-		return nil, fmt.Errorf("cannot parse services response %q: %w", data, err)
-	}
-	serviceNames := make(map[string]bool)
-	for serviceName, tags := range m {
-		if !shouldCollectServiceByName(cfg.services, serviceName) {
-			continue
-		}
-		if !shouldCollectServiceByTags(cfg.tags, tags) {
-			continue
-		}
-		serviceNames[serviceName] = true
+		return nil, err
 	}
 
 	// Query all the serviceNames in parallel
@@ -73,37 +110,6 @@ func getAllServiceNodes(cfg *apiConfig) ([]ServiceNode, error) {
 		return nil, err
 	}
 	return sns, nil
-}
-
-func shouldCollectServiceByName(filterServices []string, service string) bool {
-	if len(filterServices) == 0 {
-		return true
-	}
-	for _, filterService := range filterServices {
-		if filterService == service {
-			return true
-		}
-	}
-	return false
-}
-
-func shouldCollectServiceByTags(filterTags, tags []string) bool {
-	if len(filterTags) == 0 {
-		return true
-	}
-	for _, filterTag := range filterTags {
-		hasTag := false
-		for _, tag := range tags {
-			if tag == filterTag {
-				hasTag = true
-				break
-			}
-		}
-		if !hasTag {
-			return false
-		}
-	}
-	return true
 }
 
 func getServiceNodes(cfg *apiConfig, serviceName string) ([]ServiceNode, error) {
