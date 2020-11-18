@@ -13,8 +13,10 @@
 VictoriaMetrics is fast, cost-effective and scalable monitoring solution and time series database.
 
 It is available in [binary releases](https://github.com/VictoriaMetrics/VictoriaMetrics/releases),
-[docker images](https://hub.docker.com/r/victoriametrics/victoria-metrics/) and
-in [source code](https://github.com/VictoriaMetrics/VictoriaMetrics). Just download VictoriaMetrics and see [how to start it](#how-to-start-victoriametrics).
+[docker images](https://hub.docker.com/r/victoriametrics/victoria-metrics/), [Snap package](https://snapcraft.io/victoriametrics)
+and in [source code](https://github.com/VictoriaMetrics/VictoriaMetrics). Just download VictoriaMetrics and see [how to start it](#how-to-start-victoriametrics).
+If you use Ubuntu, then just run `snap install victoriametrics` in order to install and run it.
+Then read [Prometheus setup](#prometheus-setup) and [Grafana setup](#grafana-setup) docs.
 
 Cluster version is available [here](https://github.com/VictoriaMetrics/VictoriaMetrics/tree/cluster).
 
@@ -28,7 +30,7 @@ See [features available for enterprise customers](https://victoriametrics.com/en
 
 Click on a link in order to read the corresponding case study
 
-* [Adidas](https://github.com/VictoriaMetrics/VictoriaMetrics/wiki/CaseStudies#adidas)
+* [adidas](https://github.com/VictoriaMetrics/VictoriaMetrics/wiki/CaseStudies#adidas)
 * [CERN](https://github.com/VictoriaMetrics/VictoriaMetrics/wiki/CaseStudies#cern)
 * [COLOPL](https://github.com/VictoriaMetrics/VictoriaMetrics/wiki/CaseStudies#colopl)
 * [Zerodha](https://github.com/VictoriaMetrics/VictoriaMetrics/wiki/CaseStudies#zerodha)
@@ -558,7 +560,7 @@ VictoriaMetrics supports the following handlers from [Graphite Tags API](https:/
 * [/tags/tagSeries](https://graphite.readthedocs.io/en/stable/tags.html#adding-series-to-the-tagdb)
 * [/tags/tagMultiSeries](https://graphite.readthedocs.io/en/stable/tags.html#adding-series-to-the-tagdb)
 * [/tags](https://graphite.readthedocs.io/en/stable/tags.html#exploring-tags)
-* [/tags/<tag_name>](https://graphite.readthedocs.io/en/stable/tags.html#exploring-tags)
+* [/tags/{tag_name}](https://graphite.readthedocs.io/en/stable/tags.html#exploring-tags)
 * [/tags/findSeries](https://graphite.readthedocs.io/en/stable/tags.html#exploring-tags)
 * [/tags/autoComplete/tags](https://graphite.readthedocs.io/en/stable/tags.html#auto-complete-support)
 * [/tags/autoComplete/values](https://graphite.readthedocs.io/en/stable/tags.html#auto-complete-support)
